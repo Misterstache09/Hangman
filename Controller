@@ -1,0 +1,152 @@
+//HelloController.java
+package com.example.hangman5;
+
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+public class HelloController {
+
+
+
+    public Text Lives;
+    public Text guessWord;
+    public Pane Hanger;
+    public Pane manArmR;
+    public Pane manArmL;
+    public Pane manHead;
+    public Pane manBody;
+    public Pane manLegL;
+    public Pane manLegR;
+    public FlowPane paneLetters;
+    public Text status;
+    public Text realAnswer;
+    private int mistakes;
+    private int correct;
+    private String L;
+    private Words word = new Words();
+    private String myWord;
+    private List<String> myLetters;
+    private List<String> answer;
+    private Scene scene;
+
+
+    public void normalStart(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("normal.fxml"));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+
+    public HelloController() throws FileNotFoundException {
+    }
+
+
+    public void initialize() {
+        manHead.setVisible(false);
+        manBody.setVisible(false);
+        manArmR.setVisible(false);
+        manArmL.setVisible(false);
+        manLegR.setVisible(false);
+        manLegL.setVisible(false);
+        Hanger.setVisible(true);
+
+        mistakes = 0;
+        correct = 0;
+        Lives.setText("6");
+
+        myWord = word.getRandomWord();
+        myLetters = Arrays.asList(myWord.split(""));
+        answer = Arrays.asList(new String[myLetters.size() * 2]);
+
+        for (int i = 0; i < myLetters.size() * 2; i++) {
+            if (i % 2 == 0) {
+                answer.set(i, "_");
+            } else {
+                answer.set(i, " ");
+            }
+        }
+
+        String res = String.join("", answer);
+        guessWord.setText(res);
+        status.setText("");
+        realAnswer.setText("");
+        paneLetters.setDisable(false);
+
+    }
+
+    public void onClick(ActionEvent event) {
+        String letter = ((Button) event.getSource()).getText();
+        ((Button) event.getSource()).setDisable(true);
+        if (myLetters.contains(letter)) {
+            correct++;
+            int letterIndex = myLetters.indexOf(letter);
+            answer.set(letterIndex * 2, letter);
+            String res = String.join("", answer);
+            guessWord.setText(res);
+            if (correct == myWord.length()) {
+                status.setText("You Win!");
+                paneLetters.setDisable(true);
+            }
+        }
+            else {
+                mistakes++;
+                if (mistakes == 1) {
+                    manHead.setVisible(true);
+                    L = "5";
+                    Lives.setText(L);
+                }
+                else if (mistakes == 2) {
+                    manBody.setVisible(true);
+                    L = "4";
+                    Lives.setText(L);
+                    }
+                else if (mistakes == 3) {
+                    manArmL.setVisible(true);
+                    L = "3";
+                    Lives.setText(L);
+                }
+                else if (mistakes == 4) {
+                    manArmR.setVisible(true);
+                    L = "2";
+                    Lives.setText(L);
+                }
+                else if (mistakes == 5) {
+                    manLegL.setVisible(true);
+                    L = "1";
+                    Lives.setText(L);
+                }
+                else if (mistakes == 6) {
+                    manLegR.setVisible(true);
+                    status.setText("You Lose!");
+                    realAnswer.setText("Answer is " + myWord);
+                    paneLetters.setDisable(true);
+                    L = "0";
+                    Lives.setText(L);
+                }
+
+            }
+
+    }
+    public void restartGame(){
+        for(int i=0; i<26; i++){
+            paneLetters.getChildren().get(i).setDisable(false);
+        }
+        initialize();
+    }
+
+}
